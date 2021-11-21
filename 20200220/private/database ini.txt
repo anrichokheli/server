@@ -1,0 +1,4 @@
+host = "localhost"
+username = "id12618456_admin"
+password = "*rFLAVuu_pXs8nL"
+name = "id12618456_qveiti"

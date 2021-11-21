@@ -1,0 +1,195 @@
+<html>
+<title>ქვეითი SOS</title>
+<style>
+div.a {
+text-align: center;
+}
+#react {
+width: 100%;
+text-align: center;
+}
+#category {
+width: 100%;
+text-align: center;
+}
+canvas {
+display: inline;
+}
+</style>
+<div class="a">
+<font size="5">
+<?php date_default_timezone_set("Etc/GMT-4"); echo date("Y-m-d") . " " . date("H:i:s"); ?>
+<br>
+<br>
+<b>რეაგირებულის წილი</b>
+</font>
+</div>
+<canvas id="react" width="500" height="500"></canvas>
+<?php php("text"); ?>
+<div class="a">
+
+<font size="5">
+<br>
+<b>კატეგორიების წილები</b>
+</font>
+</div>
+<?php php("category"); ?>
+<script>
+var efficiency = <?php php("efficiency"); ?>;
+var c = document.getElementById("react");
+var ctx = c.getContext("2d");
+ctx.beginPath();
+ctx.font = "50px Arial";
+ctx.textAlign = "center";
+var text = Math.round(efficiency * 100).toString();
+text = text.concat("%");
+ctx.fillText(text, c.width/2, c.height/2);
+ctx.lineWidth = 50;
+ctx.strokeStyle = "blue";
+efficiency *= 2;
+ctx.arc(250, 250, 125, 0, efficiency * Math.PI);
+ctx.stroke();
+ctx.closePath();
+ctx.beginPath();
+ctx.strokeStyle = "blue";
+ctx.globalAlpha = "0.1";
+ctx.arc(250, 250, 125, 0, efficiency * Math.PI, true);
+ctx.stroke();
+</script>
+<?php
+function getTime($second)  {
+    $hour = floor($second / 3600);
+    $minute = floor($second / 60) % 60;
+    $second %= 60;
+    $time = $hour . "სთ " . $minute . "წთ " . $second . "წმ";
+    return $time;
+}
+function php($mode) {
+$conn = mysqli_connect("localhost", "id12329983_admin_qveiti", "9SkrL=4P.muAQ9L", "id12329983_qveiti_sos");
+// Check connection
+if ($conn->connect_error) {
+die("Connection failed: " . $conn->connect_error);
+}
+$sql = "SELECT * FROM violations";
+$result = $conn->query($sql);
+if(!empty($result))    {
+if ($result->num_rows > 0) {
+// output data of each row
+$a = 1;
+$empty = 0;
+$emission = 0;
+$pedestrianPlaces = 0;
+$road = 0;
+$infrastructure = 0;
+$sound = 0;
+$other = 0;
+$time = 0;
+$unknown = 0;
+while($row = $result->fetch_assoc()) {
+if($a) {
+$n0 = $row["n"];
+$a = 0;
+}
+if(empty($row["react"]) && empty($row["react_media"])) {
+++$empty;
+}
+if((strpos($row["situation"], "გამონაბოლქვი: ")) !== FALSE) {
+++$emission;
+}
+if((strpos($row["situation"], "ტრანსპორტი ქვეითთათვის განკუთვნილ ადგილებზე: ")) !==
+FALSE) {
+++$pedestrianPlaces;
+}
+if((strpos($row["situation"], "ქვეითთა უფლებების შელახვა გზის სავალ ნაწილზე: ")) !==
+FALSE) {
+++$road;
+}
+if((strpos($row["situation"], "ქვეითთა ინფრასტრუქტურა: ")) !== FALSE) {
+++$infrastructure;
+}
+if((strpos($row["situation"], "ხმაური და სიგნალები: ")) !== FALSE) {
+++$sound;
+
+}
+if((strpos($row["situation"], "სხვა: ")) !== FALSE) {
+++$other;
+}
+if(empty($row["situation"]))	{
+	++$unknown;
+}
+$uploadTime = $row["time"];
+$reactTime = $row["react_time"];
+if($reactTime !== "0") {
+$time += $reactTime - $uploadTime;
+}
+$n = $row["n"];
+}
+}
+}
+else    {
+    echo "<font size=25>" .  "ცარიელია" . "</font>";
+}
+if(!empty($n)) {
+$all = ($n - $n0) + 1;
+$reacted = $all - $empty;
+$efficiency = ($reacted / $all);
+$emission2 = $emission / $all;
+$pedestrianPlaces2 = $pedestrianPlaces / $all;
+$road2 = $road / $all;
+$infrastructure2 = $infrastructure / $all;
+$sound2 = $sound / $all;
+$other2 = $other / $all;
+$unknown2 = $unknown / $all;
+$reacted2 = round($efficiency * 100, 2);
+$notReacted = round((1 - $efficiency) * 100, 2);
+if($reacted !== 0) {
+$time /= $reacted;
+}
+
+$time = round($time);
+$time = getTime($time) . " (" . $time . "წმ)";
+if($mode === "efficiency") {
+echo $efficiency;
+}
+else if($mode === "text") {
+echo "
+<font size=5>სულ: $all</font><br>
+<font size=5>რეაგირებული: $reacted ($reacted2%)</font><br>
+<font size=5>არარეაგირებული: $empty ($notReacted%)</font><br>
+<font size=5>რეაგირების საშუალო დრო: $time</font><br>
+";
+}
+else if($mode === "category") {
+$emission2 *= 100;
+$pedestrianPlaces2 *= 100;
+$road2 *= 100;
+$infrastructure2 *= 100;
+$sound2 *= 100;
+$other2 *= 100;
+$unknown2 *= 100;
+$emission2 = round($emission2, 2);
+$pedestrianPlaces2 = round($pedestrianPlaces2, 2);
+$road2 = round($road2, 2);
+$infrastructure2 = round($infrastructure2, 2);
+$sound2 = round($sound2, 2);
+$other2 = round($other2, 2);
+$unknown2 = round($unknown2, 2);
+
+echo "
+<font size=5>გამონაბოლქვი: $emission ($emission2%)</font><br>
+<font size=5>ტრანსპორტი ქვეითთათვის განკუთვნილ ადგილებზე:
+$pedestrianPlaces ($pedestrianPlaces2%)</font><br>
+<font size=5>ქვეითთა უფლებების შელახვა გზის სავალ ნაწილზე: $road
+($road2%)</font><br>
+<font size=5>ქვეითთა ინფრასტრუქტურა: $infrastructure
+($infrastructure2%)</font><br>
+<font size=5>ხმაური და სიგნალები: $sound ($sound2%)</font><br>
+<font size=5>სხვა: $other ($other2%)</font><br>
+<font size=5>უცნობი: $unknown ($unknown2%)</font><br>
+";
+}
+}
+$conn->close();
+}
+?>
+</html>

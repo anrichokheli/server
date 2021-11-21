@@ -1,0 +1,11 @@
+<?php
+$name = $_GET['name'];
+$file = file_get_contents('php://input');
+$path = 'users_images/' . $name;
+$insert = file_put_contents($path, $file);
+if($insert){
+echo "1";
+} else{
+echo "0";
+}
+?>

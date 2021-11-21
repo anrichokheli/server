@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head> <title>ქვეითი SOS</title>
+<head><link rel="icon" href="<?php include 'get_web_url.php' ?>/qveitiSOS.jpg"></head>
+<style>
+table {
+border-collapse: collapse;
+width: 100%;
+color: #000000ff;
+font-family: monospace;
+font-size: 25px;
+text-align: center;
+}
+th {
+background-color: #808080ff;
+color: white;
+}
+tr:nth-child(even) {background-color: #f2f2f2}
+</style>
+</head>
+<body> <table> <tr>
+<th>ფოტო/ვიდეო</th>
+<th>მდებარეობის კოორდინატები</th>
+<th>მდებარეობის სიზუსტე</th>
+<th>კატეგორია</th>
+<th>აღწერა</th>
+<th># (ნომერი)</th>
+<th>ატვირთვის დრო</th>
+
+<th>რეაგირების ტექსტი</th>
+<th>რეაგირების ფაილი</th>
+<th>რეაგირების დრო</th>
+<th>რეაგირებისთვის საჭირო დრო</th>
+</tr> <?php
+function getTime($second)  {
+    $hour = floor($second / 3600);
+    $minute = floor($second / 60) % 60;
+    $second %= 60;
+    $time = $hour . "სთ " . $minute . "წთ " . $second . "წმ";
+    return $time;
+}
+$database = parse_ini_file(dirname(getcwd()) . "/private/database.ini");
+$conn = mysqli_connect($database["host"], $database["username"], $database["password"], $database["name"]);
+// Check connection
+if ($conn->connect_error) {
+die("Connection failed: " . $conn->connect_error);
+}
+$sql = "SELECT * FROM violations";
+$result = $conn->query($sql);
+if(!empty($result))    {
+if ($result->num_rows > 0) {
+// output data of each row
+while($row = $result->fetch_assoc()) {
+$link = $row["link"];
+
+if(strpos($link, ".mp4") !== FALSE) {
+$media = "<iframe src=$link></iframe>";
+}
+else if((strpos($link, ".jpg") !== FALSE) || (strpos($link, ".png") !== FALSE)) {
+$media = "<img src=$link alt=$link height=150 width=300>";
+}
+else {
+$media = $link;
+}
+$reactLink = $row["react_media"];
+if(strpos($reactLink, ".mp4") !== FALSE) {
+$reactMedia = "<iframe src=$reactLink></iframe>";
+}
+else if((strpos($reactLink, ".jpg") !== FALSE) || (strpos($reactLink, ".png") !== FALSE)) {
+$reactMedia = "<img src=$reactLink alt=$reactLink height=150 width=300>";
+}
+else {
+$reactMedia = $reactLink;
+}
+date_default_timezone_set("Etc/GMT-4");
+$time = $row["time"];
+$reactTime = $row["react_time"];
+$interval = $reactTime - $time;
+$time = date("Y-m-d", $time) . " " . date("H:i:s", $time);
+if($reactTime !== "0") {
+$reactTime = date("Y-m-d", $reactTime) . " " . date("H:i:s", $reactTime);
+$interval = getTime($interval) . " (" . $interval . "წმ)";
+}
+else {
+$reactTime = "";
+$interval = "";
+}
+echo "<tr><td>" . $media . "</td><td>" . $row["location"] . "</td><td>" . $row["accuracy"] . "</td><td>" . $row["situation"] . "</td><td>" . $row["description"] . "</td><td>" .
+$row["n"] . "</td><td>" . $time . "</td><td>" . $row["react"] . "</td><td>" . $reactMedia . "</td><td>" .
+$reactTime . "</td><td>" . $interval . "</td><td>" . "</td></tr>";
+} echo "</table>";
+}
+}
+$conn->close();
+?> </table>
+</body>
+</html>

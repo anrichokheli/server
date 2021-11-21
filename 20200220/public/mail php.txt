@@ -1,0 +1,35 @@
+<?php
+$to = $_GET["to"];
+if(!empty($to))    {
+    $subject = "test php აბგდ123";
+    $weburl = include 'get_web_url.php';
+    $message = "
+        <html>
+            <head>
+            </head>
+            <body>
+            <style>
+                .center {
+                    text-align: center;
+                }
+            </style>
+            <div class=center>
+                <font size=32>
+                    <b><font color=blue>ქვეითი </font><font color=red>SOS</font></b>
+                </font>
+                <br><br>
+                <body>
+                    <img src=" . $weburl . '/qveitiSOS.jpg' . " alt='' />
+                </body>
+            </div>
+            </body>
+        </html>
+    ";
+    $headers = "MIME-Version: 1.0" . "\r\n";
+    $headers = "Content-type:text/html;charset=UTF-8" . "\r\n";
+    //$headers .= 'From: "ქვეითი SOS" <qveiti.sos@gmail.com>' . "\r\n";
+    $headers .= 'From: "ქვეითი SOS" <autoemail@qveitisos.ge>' . "\r\n";
+    //$headers .= 'Cc: qveiti.sos@gmail.com' . "\r\n";
+    echo mail($to, $subject, $message, $headers);
+}
+?>

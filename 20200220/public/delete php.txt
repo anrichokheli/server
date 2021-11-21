@@ -1,0 +1,96 @@
+<?php
+session_start();
+?>
+<title>ქვეითი SOS</title>
+<head><link rel="icon" href="<?php include 'get_web_url.php' ?>/qveitiSOS.jpg"></head>
+<?php
+if(isset($_SESSION["verified"]) && $_SESSION["verified"] === true)    {?>
+<html>
+    <body>
+        <script>
+        function confirmdelete()    {
+            return confirm();
+        }
+        </script>
+    </body>
+    <style>
+        .center {
+            text-align: center;
+        }
+        .button {
+            background-color: red;
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 25px;
+            margin: 4px 2px;
+            transition-duration: 0.4s;
+            cursor: pointer;
+            background-color: white; 
+            color: black; 
+            border: 2px solid red;
+            border-radius: 8px;
+        }
+        .button:hover {
+            background-color: red;
+            color: white;
+        }
+    </style>
+<?php
+$N = $_SESSION["delete_n"];
+echo "<div class=center><image src=warning.png style=width:128px; height:128px;><image src=delete.png style=width:128px; height:128px;><br><br><font size=25 color=red>" . "ატვირთული მასალა №" . "<strong>" . $N . "</strong>" . "-ის წაშლა" . "</font></div>";
+$_SESSION["verified"] = false;
+$_SESSION["post"] = true;
+?>
+<br><br>
+<div class="center">
+<form method="post" enctype="multipart/form-data" onsubmit="return confirmdelete()">
+    <input type="password" name="code" placeholder="წაშლის კოდი..." required>
+    <input type="file" name="file" required>
+    <br><br>
+    <input type="submit" class="button" name="delete" value="ატვირთული მასალის წაშლა">
+</form>
+</div>
+</html>
+<?php
+}
+else    {
+    $submited = 0;
+    $correct = 0;
+    if(isset($_SESSION["post"]) && $_SESSION["post"] === true)   {
+        $_SESSION["post"] = false;
+        if(isset($_POST["delete"]))    {
+            $submited = 1;
+            $inputcode = $_POST["code"];
+            $inputfile = file_get_contents($_FILES["file"]["tmp_name"]);
+            $code = file_get_contents(dirname(getcwd()) . "/private/code_delete");
+            $file = file_get_contents(dirname(getcwd()) . "/private/keyfile_delete");
+            if(($inputcode === $code) && ($inputfile === $file))    {
+                $correct = 1;
+            }
+        }
+    }
+    if($submited)    {
+        if($correct)    {
+            echo 1;
+        }
+        else    {
+            ?>
+            <script>
+            window.location.replace('incorrect.php');
+            </script>
+            <?php
+        }
+    }
+    else    {
+        $_SESSION["verify_mode"] = true;
+        ?><script>
+        window.location.replace('login.php');
+        </script><?php
+        //header('location: login.php');
+    }
+}
+?>

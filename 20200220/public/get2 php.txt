@@ -1,0 +1,96 @@
+<html>
+<?php
+function getTime($second)  {
+    $hour = floor($second / 3600);
+    $minute = floor($second / 60) % 60;
+    $second %= 60;
+    $time = $hour . "სთ " . $minute . "წთ " . $second . "წმ";
+    return $time;
+}
+if(isset($_GET["n"]))
+    $n = $_GET["n"];
+else if(isset($_POST["n"]))
+    $n = $_POST["n"];
+$database = parse_ini_file(dirname(getcwd()) . "/private/database.ini");
+define ('dbuser', $database["username"]);
+define ('dbpw', $database["password"]);
+define ('dbhost', $database["host"]);
+define ('dbname', $database["name"]);
+$dbc = mysqli_connect(dbhost, dbuser, dbpw, dbname);
+if(!$dbc) {
+die("DATABASE CONNECTION FAILED:" .mysqli_error($dbc));
+exit();
+}
+$dbs = mysqli_select_db($dbc, dbname);
+if(!$dbs) {
+die("DATABASE SELECTION FAILED:" .mysqli_error($dbc));
+exit();
+}
+$query = "SELECT * FROM violations WHERE n = $n";
+if(mysqli_query($dbc, $query))    {
+$row = mysqli_fetch_array(mysqli_query($dbc, $query));
+$media = $row["link"];
+$location = $row["location"];
+$accuracy = $row["accuracy"];
+$category = $row["situation"];
+$description = nl2br($row["description"]);
+$react = $row["react"];
+$reactMedia = $row["react_media"];
+$location2 = $location;
+if(strpos($media, ".mp4") !== FALSE)  {
+    $media = "<iframe src=$media width=100%></iframe>";
+}
+else if((strpos($media, ".jpg") !== FALSE) || (strpos($media, ".png") !== FALSE) || (strpos($media, ".gif") !== FALSE)) {
+    $media = "<img src=$media alt=$media width=100%>";
+}
+if(strpos($reactMedia, ".mp4") !== FALSE)  {
+    $reactMedia = "<iframe src=$reactMedia width=100%></iframe>";
+}
+else if((strpos($reactMedia, ".jpg") !== FALSE) || (strpos($reactMedia, ".png") !== FALSE) || (strpos($reactMedia, ".gif") !== FALSE)) {
+    $reactMedia = "<img src=$reactMedia alt=$reactMedia width=100%>";
+}
+else if(!empty($reactMedia))   {
+    $reactMedia = "<a href = $reactMedia>რეაგირების ფაილის გახსნა</a>";
+}
+if(strpos($location, " ("))    {
+    $location = strstr($location, " (", true);
+}
+$location = str_replace(' ', '%20', $location);
+$map = "<iframe src=https://www.google.com/maps/embed/v1/place?key=AIzaSyCGcNbL7Yugt8PPTebz8fNfvxoas0ZMXJo&q=$location height=400 width=100%></iframe>";
+$accuracy = "<br>" . "მდებარეობის სიზუსტე: " . $accuracy;
+if(!empty($category))
+	$category = "<br>" . "კატეგორია: " . $category;
+if(!empty($description))
+	$description = "<br>" . "აღწერა: " . $description;
+if(!empty($react))
+	$react = "<br>" . "რეაგირების ტექსტი: " . $react;
+if(!empty($reactMedia))
+	$reactMedia = "<br>" . "რეაგირების ფაილი: " . $reactMedia;
+if(!empty($location2))
+	$location2 = "<br>" . "მდებარეობის კოორდინატები (მისამართი): " . $location2;
+$map = "<br>" . $map;
+if($location === "")    {
+    $accuracy = "";
+    $map = "";
+}
+date_default_timezone_set("Etc/GMT-4");
+$time = $row["time"];
+$reactTime = $row["react_time"];
+$interval = $reactTime - $time;
+$time = date("Y-m-d", $time) . "    " . date("H:i:s", $time);
+if($reactTime !== "0")  {
+    $reactTime = date("Y-m-d", $reactTime) . "    " . date("H:i:s", $reactTime);
+    $interval = getTime($interval) . " (" . $interval . "წმ)";
+    $reactTime = "<br>" . "რეაგირების დრო და თარიღი: " . $reactTime;
+    $interval = "<br>" . "რეაგირებისთვის საჭირო დრო: " . $interval;
+}
+else    {
+    $reactTime = "";
+    $interval = "";
+}
+$time = "<br>" . "ატვირთვის დრო და თარიღი: " . $time;
+echo "#: " . $n . "<br>" . "ფოტო/ვიდეო: " . "<br>" . $media . $category . $description . $time . $location2 . $accuracy . $map . $react . $reactMedia . $reactTime . $interval;
+mysqli_close($dbc);
+}
+?>
+</html>

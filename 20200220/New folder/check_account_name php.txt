@@ -1,0 +1,27 @@
+<?php
+$conn = mysqli_connect("localhost", "id12329983_admin_qveiti", "9SkrL=4P.muAQ9L", "id12329983_qveiti_sos");
+$text = mysqli_real_escape_string($conn, $_GET['text']);
+// Check connection
+if ($conn->connect_error) {
+die("Connection failed: " . $conn->connect_error);
+}
+$sql = "SELECT * FROM users";
+$result = $conn->query($sql);
+if(!empty($result))    {
+if ($result->num_rows > 0) {
+// output data of each row
+$echo = "1";
+while($row = $result->fetch_assoc()) {
+    if($text === $row["account_name"])    {
+        $echo = "0";
+        break;
+    }
+}
+echo $echo;
+}
+else    {
+    echo "1";
+}
+}
+$conn->close();
+?>

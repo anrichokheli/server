@@ -1,0 +1,30 @@
+<?php
+define ('dbname', 'id12329983_qveiti_sos');
+$dbc = mysqli_connect("localhost", "id12329983_admin_qveiti", "9SkrL=4P.muAQ9L", dbname);
+if(!$dbc) {
+die("DATABASE CONNECTION FAILED:" .mysqli_error($dbc));
+exit();
+}
+$dbs = mysqli_select_db($dbc, dbname);
+if(!$dbs) {
+die("DATABASE SELECTION FAILED:" .mysqli_error($dbc));
+exit();
+}
+$n = mysqli_real_escape_string($dbc, $_GET['n']);
+$situation = mysqli_real_escape_string($dbc, $_GET['situation']);
+$description = mysqli_real_escape_string($dbc, $_GET['description']);
+$query = "UPDATE violations SET situation='$situation', description='$description' WHERE
+n=$n";
+if(mysqli_query($dbc, $query)){
+echo "1";
+} else{
+echo "0" . mysqli_error($dbc);
+}
+mysqli_close($dbc);
+$number = time() . rand(0, time());
+$n = strval($number);
+
+$file = fopen("n.txt", 'w');
+fwrite($file, $n);
+fclose($file);
+?>

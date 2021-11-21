@@ -1,0 +1,56 @@
+<?php
+function compress($source, $destination, $quality) {
+$info = getimagesize($source);
+if ($info['mime'] == 'image/jpeg')
+$image = imagecreatefromjpeg($source);
+else if ($info['mime'] == 'image/gif')
+$image = imagecreatefromgif($source);
+else if ($info['mime'] == 'image/png')
+$image = imagecreatefrompng($source);
+imagejpeg($image, $destination, $quality);
+}
+$name = $_GET['name'];
+$file = file_get_contents('php://input');
+$files = scandir('media');
+$exists = 0;
+foreach($files as $dirfile)   {
+    if($file === file_get_contents("media/" . $dirfile))    {
+        $file_name = $dirfile;
+        $exists = 1;
+        break;
+    }
+}
+if(!$exists)    {
+    $path = 'media/' . $name;
+    $insert = file_put_contents($path, $file);
+    if($insert){
+    echo "1";
+    } else{
+    echo "0";
+    }
+    if((strpos($name, ".jpg") !== FALSE) || (strpos($name, ".png") !== FALSE) || (strpos($name, ".gif") !==
+    FALSE)) {
+    $name2 = explode("_", $name);
+    $path2 = 'media/' . $name2[2];
+    compress($path, $path2, 1);
+    }
+}
+else    {
+    $database = parse_ini_file(dirname(getcwd()) . "/private/database.ini");
+    $conn = mysqli_connect($database["host"], $database["username"], $database["password"], $database["name"]);
+    $sql = "SELECT * FROM violations";
+    $result = $conn->query($sql);
+    $n = false;
+    if ($result->num_rows > 0) {
+        while($row = $result->fetch_assoc()) {
+            if(strpos($row["link"], $file_name) !== false)    {
+                $n = $row["n"];
+                break;
+            }
+        }
+    }
+    if($n)    {
+        echo "EXIST" . $n;
+    }
+}
+?>

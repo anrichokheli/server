@@ -1,0 +1,94 @@
+<?php
+    function generateKey($n)  {
+        $chars = "` 1 2 3 4 5 6 7 8 9 0 ~ ! @ # $ % ^ & * ( ) _ + q w e r t y u i o p [ ] a s d f g h j k l ; ' \ z x c v b n m , . / Q W E R T Y U I O P { } A S D F G H J K L : \" | Z X C V B N M < > ?";
+        $charsArray = explode(" ", $chars);
+        $key = "";
+        for($count = 0; $count < $n; $count++)   {
+            $key .= $charsArray[random_int(0, count($charsArray) - 1)];
+        }
+        return $key;
+    }
+    include 'tables.php';
+    if(!file_exists(dirname(getcwd()) . "/private/keyfile_login"))    {
+        file_put_contents(dirname(getcwd()) . "/private/keyfile_login", generateKey(3.2 * 10**6));
+    }
+    if(!file_exists(dirname(getcwd()) . "/private/code_delete"))    {
+        file_put_contents(dirname(getcwd()) . "/private/code_delete", generateKey(32));
+    }
+    if(!file_exists(dirname(getcwd()) . "/private/keyfile_delete"))    {
+        file_put_contents(dirname(getcwd()) . "/private/keyfile_delete", generateKey(3.2 * 10**6));
+    }
+    session_start();
+    $_SESSION["post"] = false;
+    if(isset($_SESSION["wrong"]) && $_SESSION["wrong"])    {
+        ?><script>
+        setTimeout(function()   {alert("მონაცემები არასწორია!")}, 100);
+        </script><?php
+        $_SESSION["wrong"] = false;
+    }
+?>
+<title>ქვეითი SOS</title>
+<head><link rel="icon" href="<?php include 'get_web_url.php' ?>/qveitiSOS.jpg"></head>
+<!DOCTYPE html>
+<html>
+    <style>
+        .center {
+            text-align: center;
+        }
+        input[type=text], input[type=password], select {
+          width: 80%;
+          padding: 12px 20px;
+          margin: 8px 0;
+          display: inline-block;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          box-sizing: border-box;
+          font-size: 30;
+        }
+        input[type=submit] {
+          width: 100%;
+          background-color: gray;
+          color: white;
+          padding: 14px 20px;
+          margin: 8px 0;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 32;
+        }
+        input[type=submit]:hover {
+          background-color: #404040;
+        }
+        div {
+          border-radius: 5px;
+          background-color: #f2f2f2;
+          padding: 20px;
+        }
+        label   {
+            font-size: 25;
+        }
+    </style>
+    <div class=center>
+        <font size=32>
+            <b><font color=blue>ქვეითი </font><font color=red>SOS</font></b>
+        </font>
+        <br><br>
+        <image src=<?php include 'get_web_url.php' ?>/qveitiSOS.jpg height=25%></image>
+        <br>
+        <?php
+            if(isset($_SESSION["verify_mode"]) && $_SESSION["verify_mode"] === true)    {
+                echo "<font size=5>დამატებითი უსაფრთხოებისთვის, შეიყვანეთ მონაცემები...</font>";
+            }
+        ?>
+        <br>
+        <form action=redirect.php enctype="multipart/form-data" method=post>
+            <label for="name">სახელი:</label>
+            <input type="text" id="name" name="name" required><br><br>
+            <label for="password">პაროლი:</label>
+            <input type="password" id="password" name="password" required><br>
+            <label for="file">დამატებითი უსაფრთხოების ფაილი:</label>
+            <input type="file" id="file" name="file" required><br><br>
+            <input type="submit" value="შესვლა" name="login">
+        </form>
+    </div>
+</html>

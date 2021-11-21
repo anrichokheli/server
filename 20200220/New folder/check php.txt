@@ -1,0 +1,37 @@
+<?php
+define ('dbuser','id12329983_admin_qveiti');
+define ('dbpw','9SkrL=4P.muAQ9L');
+define ('dbhost','localhost');
+define ('dbname','id12329983_qveiti_sos');
+$dbc = mysqli_connect(dbhost, dbuser, dbpw, dbname);
+if(!$dbc) {
+die("DATABASE CONNECTION FAILED:" .mysqli_error($dbc));
+exit();
+}
+$dbs = mysqli_select_db($dbc, dbname);
+if(!$dbs) {
+die("DATABASE SELECTION FAILED:" .mysqli_error($dbc));
+exit();
+}
+$n = mysqli_real_escape_string($dbc, $_GET['n']);
+if(!empty($n))  {
+    $IDs = explode("|", $n);
+    $reactEcho = "";
+for($i = 0; $i < count($IDs); $i++)   {
+$query = "SELECT * FROM violations WHERE n = $IDs[$i]";
+$row = mysqli_fetch_array(mysqli_query($dbc, $query));
+if(mysqli_query($dbc, $query)){
+    if(!empty($row["react"]) && !empty($row["react_media"]))    {
+        $reactEcho .= $IDs[$i] . '30';
+    }
+}
+}
+if(empty($reactEcho))
+    $reactEcho = "0";
+echo $reactEcho;
+}
+else    {
+    echo "0";
+}
+mysqli_close($dbc);
+?>

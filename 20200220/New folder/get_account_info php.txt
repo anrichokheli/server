@@ -1,0 +1,74 @@
+<?php
+$conn = mysqli_connect("localhost", "id12329983_admin_qveiti", "9SkrL=4P.muAQ9L", "id12329983_qveiti_sos");
+$mode = mysqli_real_escape_string($conn, $_GET['mode']);
+$text = mysqli_real_escape_string($conn, $_GET['searchfor']);
+$return = mysqli_real_escape_string($conn, $_GET['return']);
+// Check connection
+if ($conn->connect_error) {
+die("Connection failed: " . $conn->connect_error);
+}
+$sql = "SELECT * FROM users";
+$result = $conn->query($sql);
+if(!empty($result))    {
+if ($result->num_rows > 0) {
+// output data of each row
+$accountFound = FALSE;
+while($row = $result->fetch_assoc()) {
+    $string_id = strval($row["id"]);
+    if((($text === $row["account_name"]) && ($mode === "AN")) || (($text === $string_id) && ($mode === "ID")))    {
+        if($return === "image") {
+            $image = $row["image"];
+        }
+        else if($return === "name") {
+            $name = $row["name"];
+        }
+        else if($return === "time") {
+            $time = $row["time_created"];
+        }
+        else if($return === "account_name") {
+            if($mode === "AN")    {
+                $accountName = $text;
+            }
+            else if($mode == "ID")   {
+                $accountName = $row["account_name"];
+            }
+        }
+        else if($return === "id")   {
+            if($mode === "AN")    {
+                $id = $string_id;
+            }
+            else if($mode == "ID")   {
+                $id = $text;
+            }
+        }
+        $accountFound = TRUE;
+        break;
+    }
+}
+if($accountFound)    {
+    if($return === "image")    {
+        echo "1" . $image;
+    }
+    else if($return === "name")   {
+        echo "1" . $name;
+    }
+    else if($return === "time")   {
+        echo "1" . $time;
+    }
+    else if($return === "account_name")   {
+        echo "1" . $accountName;
+    }
+    else if($return === "id")   {
+        echo "1" . $id;
+    }
+}
+else    {
+    echo "0";
+}
+}
+else    {
+    echo "0";
+}
+}
+$conn->close();
+?>

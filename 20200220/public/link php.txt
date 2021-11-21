@@ -1,0 +1,28 @@
+<?php
+$database = parse_ini_file(dirname(getcwd()) . "/private/database.ini");
+define ('dbname', $database["name"]);
+$dbc = mysqli_connect($database["host"], $database["username"], $database["password"], dbname);
+if(!$dbc) {
+die("DATABASE CONNECTION FAILED:" .mysqli_error($dbc));
+exit();
+}
+$dbs = mysqli_select_db($dbc, dbname);
+if(!$dbs) {
+die("DATABASE SELECTION FAILED:" .mysqli_error($dbc));
+exit();
+}
+$link = mysqli_real_escape_string($dbc, $_GET['link']);
+$time = time();
+$query = "INSERT INTO violations (location, accuracy, situation, description, link, react, react_media, time, react_time) VALUES ('', '', '', '', '$link', '', '', '$time', 0)";
+if(mysqli_query($dbc, $query)){
+echo "#" . mysqli_insert_id($dbc);
+} else{
+echo "0" . mysqli_error($dbc);
+}
+mysqli_close($dbc);
+$number = time() . rand(0, time());
+$n = strval($number);
+$file = fopen("n.txt", 'w');
+fwrite($file, $n);
+fclose($file);
+?>
