@@ -1,0 +1,762 @@
+<title>ქვეითი SOS</title>
+<head><link rel="icon" href="pedestriansos.png"></head>
+<meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1">
+<html>
+<style>
+	#title_pedestrian	{
+		color: #0000ff;
+	}
+	#page	{
+		text-align: center;
+		//animation-name: invisibleToVisible;
+		//animation-duration: 0.25s;
+	}
+	@keyframes invisibleToVisible	{
+		from {opacity: 0;}
+		to {opacity: 1;}
+	}
+	.buttons	{
+		outline: none;
+		border: none;
+		padding: 8px 8px;
+		text-align: center;
+		text-decoration: none;
+		display: inline-block;
+		font-size: 20px;
+		margin: 4px 2px;
+		transition-duration: 0.4s;
+		cursor: pointer;
+		background-color: rgba(0, 0, 0, 0);
+		height: 64px;
+		width: 210px;
+	}
+	.buttons:active	{
+		background-color: #c0c0c040;
+	}
+	.animate-top	{
+		//position: relative;
+		//animation: animatetop 0.25s
+	}
+	@keyframes animatetop	{
+		from	{
+			top: -300px;
+			opacity: 0
+		}
+		to	{
+			top: 0;
+			opacity: 1
+		}
+	}
+	#reactButton	{
+		border: 2px solid #4080ff;
+	}
+	#reactButton:hover	{
+		background-color: #4080ff;
+	}
+	#snackbar {
+		visibility: hidden;
+		min-width: 250px;
+		margin-left: -125px;
+		background-color: #333;
+		color: #fff;
+		text-align: center;
+		border-radius: 2px;
+		padding: 16px;
+		position: fixed;
+		z-index: 1;
+		left: 50%;
+		bottom: 30px;
+		font-size: 17px;
+	}
+	#snackbar.show {
+		visibility: visible;
+		-webkit-animation: fadein 0.25s, fadeout 0.25s 2.75s;
+		animation: fadein 0.25s, fadeout 0.25s 2.75s;
+	}
+	@-webkit-keyframes fadein {
+		from {bottom: 0; opacity: 0;} 
+		to {bottom: 30px; opacity: 1;}
+	}
+	@keyframes fadein {
+		from {bottom: 0; opacity: 0;}
+		to {bottom: 30px; opacity: 1;}
+	}
+	@-webkit-keyframes fadeout {
+		from {bottom: 30px; opacity: 1;} 
+		to {bottom: 0; opacity: 0;}
+	}
+	@keyframes fadeout {
+		from {bottom: 30px; opacity: 1;}
+		to {bottom: 0; opacity: 0;}
+	}
+	#uploadProgress {
+		width: 100%;
+		background-color: #ddd;
+		border-radius: 4px;
+	}
+	#uploadBar {
+		width: 0%;
+		height: 30px;
+		background-color: #4020ff;
+		line-height: 30px;
+		border-radius: 4px;
+	}
+	#uploadPercentage	{
+		text-align: center;
+	}
+	.modal {
+		display: none;
+		position: fixed;
+		z-index: 1;
+		padding-top: 100px;
+		left: 0;
+		top: 0;
+		width: 100%;
+		height: 100%;
+		overflow: auto;
+		background-color: rgb(0,0,0);
+		background-color: rgba(0,0,0,0.4);
+		-webkit-animation-duration: 0.15s;
+		animation-duration: 0.15s;
+		-webkit-animation-name: fadeIn;
+		animation-name: fadeIn;
+		-webkit-animation-name: slideIn;
+		animation-name: slideIn;
+	}
+	.modal-content {
+		background-color: #fefefe;
+		margin: 5% auto 50% auto;
+		padding: 20px;
+		border: 1px solid #888;
+		width: 80%;
+		border-radius: 8px;
+	}
+	.close {
+		color: #aaa;
+		float: right;
+		font-size: 28px;
+		font-weight: bold;
+	}
+	.close:hover,
+	.close:focus {
+		color: #ff0000;
+		text-decoration: none;
+		cursor: pointer;
+	}
+	@-webkit-keyframes fadeIn {
+		from {opacity: 0} 
+		to {opacity: 1}
+	}
+	@keyframes fadeIn {
+		from {opacity: 0} 
+		to {opacity: 1}
+	}
+	@-webkit-keyframes slideIn {
+		from {top: -300px; opacity: 0} 
+		to {top: 0; opacity: 1}
+	}
+	@keyframes slideIn {
+		from {top: -300px; opacity: 0}
+		to {top: 0; opacity: 1}
+	}
+	.imageButtons	{
+		width: 64px;
+		height: 64px;
+		vertical-align: middle;
+		background: none;
+	}
+	#photoButtonImage	{
+		background-image: url("/?/images/photoButton.png");
+	}
+	#videoButtonImage	{
+		background-image: url("/?/images/videoButton.png");
+	}
+	#fileButtonImage	{
+		background-image: url("/?/images/fileButton.png");
+	}
+	#databaseButtonImage	{
+		background-image: url("/?/images/databaseButton.png");
+	}
+	#statisticsButtonImage	{
+		background-image: url("/?/images/statisticsButton.png");
+	}
+	#choosePhotoImage	{
+		background-image: url("/?/images/choosePhoto.png");
+	}
+	#chooseVideoImage	{
+		background-image: url("/?/images/chooseVideo.png");
+	}
+	.upload	{
+		font-size: 20px;
+		font-weight: bold;
+		background-color: rgba(128, 128, 128, 0.25);
+		padding: 1px, 1px;
+		border-radius: 8px;
+		display: inline-block;
+		cursor: pointer;
+		margin: 0px 0px;
+		height: auto;
+		width: auto;
+	}
+	.upload:active {
+		background-color: #c0c0c0;
+	}
+	.upload:disabled	{
+		color: #808080;
+	}
+	#getAudioImage	{
+		background-image: url("/?/images/microphone.png");
+	}
+	.switch {
+		position: relative;
+		display: inline-block;
+		width: 60px;
+		height: 34px;
+	}
+	.switch input {
+		opacity: 0;
+		width: 0;
+		height: 0;
+	}
+	.slider {
+		position: absolute;
+		cursor: pointer;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-color: #ccc;
+		-webkit-transition: .4s;
+		transition: .4s;
+	}
+	.slider:before {
+		position: absolute;
+		content: "";
+		height: 26px;
+		width: 26px;
+		left: 4px;
+		bottom: 4px;
+		background-color: white;
+		-webkit-transition: .4s;
+		transition: .4s;
+	}
+	input:checked + .slider {
+		background-color: #256AFF;
+	}
+	input:focus + .slider {
+		box-shadow: 0 0 1px #256AFF;
+	}
+	input:checked + .slider:before {
+		-webkit-transform: translateX(26px);
+		-ms-transform: translateX(26px);
+		transform: translateX(26px);
+	}
+	.slider.round {
+		border-radius: 34px;
+	}
+	.slider.round:before {
+		border-radius: 50%;
+	}
+	#darkmodelabel	{
+		cursor: pointer;
+	}
+	#descriptionInput	{
+		resize: none;
+		width: 100%;
+		height: 50%;
+	}
+</style>
+<div id="page">
+	<div id="previewModal" class="modal">
+		<div class="backgroundcolourclass modal-content">
+			<span id="closeFilePreviewWindow" class="close">&times;</span>
+			<span id="preview"></span><br>
+			<button class="buttons upload textcolourclass" id="upload">&uArr; ატვირთვა</button>
+		</div>
+	</div>
+	<div id="fileModal" class="modal">
+		<div class="backgroundcolourclass modal-content">
+			<span id="closeFilePickerWindow" class="close">&times;</span>
+			<span class="textcolourclass">აირჩიეთ ფაილის სახეობა</span>
+			<br><br>
+			<button id="choosePhotoImage" class="buttons imageButtons" onclick="choosePhoto()"></button>
+			<button class="buttons textcolourclass" id="choosePhotoText" onclick="choosePhoto()">სურათი</button>
+			<br>
+			<button id="chooseVideoImage" class="buttons imageButtons" onclick="chooseVideo()"></button>
+			<button class="buttons textcolourclass" id="chooseVideoText" onclick="chooseVideo()">ვიდეო</button>
+		</div>
+	</div>
+	<div id="descriptionModal" class="modal">
+		<div class="backgroundcolourclass modal-content">
+			<span id="closeDescriptionWindow" class="close">&times;</span>
+			<span class="textcolourclass">აღწერა</span>
+			<br><br>
+			<textarea id="descriptionInput" class="textcolourclass backgroundcolourclass" placeholder="დაწერეთ აღწერა..."></textarea>
+			<br><br>
+			<button class="buttons upload" id="uploadDescription" onclick="uploadDescription()" disabled>&uArr; ატვირთვა</button>
+		</div>
+	</div>
+	<div id="audioModal" class="modal">
+		<div class="backgroundcolourclass modal-content">
+			<span id="closeAudioWindow" class="close">&times;</span>
+			<button id="getAudioImage" class="buttons imageButtons" onclick="getAudio()"></button>
+			<button class="buttons textcolourclass" id="getAudioText" onclick="getAudio()">ხმოვანი აღწერა</button>
+			<button class="buttons upload" id="uploadAudio" disabled>&uArr; ატვირთვა</button>
+		</div>
+	</div>
+	<div id="uploadModal" class="modal">
+		<div class="backgroundcolourclass modal-content">
+			<span class="textcolourclass">მიმდინარეობს ატვირთვა...</span>
+			<br><br>
+			<span id="uploadPercentage" class="textcolourclass"></span>
+			<div id="uploadProgress">
+				<div id="uploadBar"></div>
+			</div>
+		</div>
+	</div>
+	<div id="noticeModal" class="modal">
+		<div class="backgroundcolourclass modal-content">
+			<span id="closeNoticeWindow" class="close">&times;</span>
+			<div id="noticeWindowContent"></div>
+		</div>
+	</div>
+	<div id="snackbar"></div>
+	<input type="file" accept="image/*" capture="camera" id="takePhoto" style="display:none" oninput="uploadPhoto()">
+	<input type="file" accept="video/*" capture="camera" id="recordVideo" style="display:none" oninput="uploadVideo()">
+	<input type="file" accept="image/*" id="choosePhoto" style="display:none" oninput="previewPhoto()">
+	<input type="file" accept="video/*" id="chooseVideo" style="display:none" oninput="previewVideo()">
+	<input type="file" accept="audio/*" capture="audio" id="recordAudio" style="display:none" oninput="gotAudio()">
+	<link rel="stylesheet">
+	<div class="animate-top">
+		<span id="title">
+			<b><span id="title_pedestrian">ქვეითი </span><font color=red>SOS</font></b>
+		</span>
+		<br><br>
+		<image style="display:none;" id="qveitiSOSimage" src="pedestriansos2.png"></image>
+		<br><br>
+	</div>
+	<button id="photoButtonImage" class="buttons imageButtons" onclick="takePhoto()"></button>
+	<button class="buttons textcolourclass" type="button" id="photoButton" onclick="takePhoto()">ფოტოს გადაღება</button>
+	<br>
+	<button id="videoButtonImage" class="buttons imageButtons" onclick="recordVideo()"></button>
+	<button class="buttons textcolourclass" type="button" id="videoButton" onclick="recordVideo()">ვიდეოს გადაღება</button>
+	<br>
+	<button id="fileButtonImage" class="buttons imageButtons" onclick="chooseFile()"></button>
+	<button class="buttons textcolourclass" type="button" id="fileButton" onclick="chooseFile()">ფაილის არჩევა</button>
+	<br>
+	<button id="databaseButtonImage" class="buttons imageButtons" onclick="openDatabase()"></button>
+	<button class="buttons textcolourclass" type="button" id="databaseButton" onclick="openDatabase()">მონაცემთა ბაზა</button>
+	<br>
+	<button id="statisticsButtonImage" class="buttons imageButtons" onclick="openStatistics()"></button>
+	<button class="buttons textcolourclass" type="button" id="statisticsButton" onclick="openStatistics()">სტატისტიკა</button>
+	<br><br>
+	<label class="switch">
+		<input type="checkbox" id="darkmode" onclick="darkMode()">
+		<span class="slider round"></span>
+	</label>
+	<label id="darkmodelabel" for="darkmode" class="textcolourclass"> <img src="/?/images/darkmode.png"> მუქი რეჟიმი</label>
+</div>
+<script>
+	var textColour;
+	var backgroundColour;
+	var fileType;
+	var n;
+	var key;
+	var sound_id;
+	var sound_key;
+	var latitude;
+	var longitude;
+	var altitude;
+	var accuracy;
+	var gotLocation;
+	var uploadPercent;
+	let uploadPercentageElement = document.getElementById("uploadPercentage");
+	let uploadBarElement = document.getElementById("uploadBar");
+	let uploadModal = document.getElementById("uploadModal");
+	let fileModal = document.getElementById("fileModal");
+	let audioModal = document.getElementById("audioModal");
+	let descriptionModal = document.getElementById("descriptionModal");
+	let noticeModal = document.getElementById("noticeModal");
+	document.getElementById("closeFilePreviewWindow").onclick = function(){closeFilePreview();clearAllInput();};
+	document.getElementById("closeFilePickerWindow").onclick = function(){fileModal.style.display = "none";};
+	document.getElementById("closeAudioWindow").onclick = function(){closeAudioModal();clearAllInput();};
+	document.getElementById("closeDescriptionWindow").onclick = function(){closeDescriptionModal();};
+	document.getElementById("closeNoticeWindow").onclick = function(){noticeModal.style.display = "none";};
+	let uploadAudioButton = document.getElementById("uploadAudio");
+	let uploadDescriptionButton = document.getElementById("uploadDescription");
+	let descriptionInputElement = document.getElementById("descriptionInput");
+	function setElementEnable(element, enabled)	{
+		element.disabled = !enabled;
+		if(enabled)	{
+			if(darkModeElement.checked)	{
+				local_colour = "#ffffff";
+			}
+			else	{
+				local_colour = "#000000";
+			}
+		}
+		else	{
+			local_colour = "#808080";
+		}
+		element.style.color = local_colour;
+	}
+	descriptionInputElement.oninput = function()	{
+		setElementEnable(uploadDescriptionButton, (this.value != ''));
+	};
+	function setPreview(file)	{
+		var fileURL = URL.createObjectURL(file);
+		var fileType = file.type;
+		//var fileName = file.name;
+		//document.getElementById("fileName").innerHTML = fileName;
+		if(fileType.includes("image"))	{
+			var filePreview = "<img class=preview src=" + fileURL + " style=\"max-width:75%\"></img>";
+		}
+		else if(fileType.includes("video"))	{
+			var filePreview = "<video controls class=preview src=" + fileURL + " style=\"max-width:75%\"></video>";
+		}
+		else	{
+			var filePreview = "<a style=font-size:32px target=_blank href=" + fileURL + ">ატვირთული ფაილის ნახვა</a>";
+		}
+		document.getElementById("preview").innerHTML = filePreview;
+	}
+	function openDescriptionModal()	{
+		descriptionInputElement.value = '';
+		descriptionModal.style.display = "block";
+	}
+	function closeFilePreview()	{
+		previewModal.style.display = "none";
+		document.getElementById("preview").innerHTML = '';
+	}
+	function closeAudioModal()	{
+		audioModal.style.display = "none";
+		setElementEnable(uploadAudioButton, 0);
+	}
+	function closeDescriptionModal()	{
+		descriptionModal.style.display = "none";
+		setElementEnable(uploadDescriptionButton, 0);
+	}
+	window.onclick = function(event) {
+		if (event.target == fileModal) {
+			fileModal.style.display = "none";
+		}
+		else if(event.target == previewModal)	{
+			closeFilePreview();
+			clearAllInput();
+		}
+		else if(event.target == audioModal)	{
+			closeAudioModal();
+			clearAllInput();
+		}
+		else if(event.target == descriptionModal)	{
+			closeDescriptionModal();
+			clearAllInput();
+		}
+		else if(event.target == noticeModal)	{
+			noticeModal.style.display = "none";
+		}
+	}
+	function showSnackbar(text) {
+		var snackbarElement = document.getElementById("snackbar");
+		snackbarElement.innerHTML = text;
+		snackbarElement.className = "show";
+		setTimeout(function(){ snackbarElement.className = snackbarElement.className.replace("show", ""); }, 3000);
+	}
+	function setCookie(cname, cvalue, exdays) {
+		var d = new Date();
+		d.setTime(d.getTime() + (exdays*24*60*60*1000));
+		var expires = "expires="+ d.toUTCString();
+		document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+	}
+	function getCookie(cname){
+		var name = cname + "=";
+		var decodedCookie = decodeURIComponent(document.cookie);
+		var ca = decodedCookie.split(';');
+		for(var i = 0; i <ca.length; i++) {
+			var c = ca[i];
+			while (c.charAt(0) == ' ') {
+				c = c.substring(1);
+			}
+			if (c.indexOf(name) == 0) {
+				return c.substring(name.length, c.length);
+			}
+		}
+		return "";
+	}
+	function getLocation() {
+		if (navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition(showPosition);
+		}
+	}
+	function showPosition(position) {
+		latitude = position.coords.latitude;
+		longitude = position.coords.longitude;
+		altitude = position.coords.altitude;
+		accuracy = position.coords.accuracy;
+		gotLocation = 1;
+	}
+	getLocation();
+	function uploadLocation()	{
+		var locationAjax = new XMLHttpRequest();
+		locationAjax.open("POST", "location.php", true);
+		locationAjax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		locationAjax.onreadystatechange = function(){
+			if(this.readyState == 4 && this.status == 200 && this.responseText == "1"){
+				setTimeout(function(){showSnackbar("მდებარეობის კოორდინატები აიტვირთა");}, 3001);
+			}
+		};
+		locationAjax.send("n=" + n + "&latitude=" + latitude + "&longitude=" + longitude + "&altitude=" + altitude + "&accuracy=" + accuracy + "&key=" + key);
+	}
+	function setUploadProgress(ajaxElement)	{
+		ajaxElement.upload.onprogress = function(){
+			uploadPercent = (((event.loaded / event.total) * 100).toFixed(2));
+			uploadBarElement.style.width = uploadPercent + "%";
+			uploadPercentageElement.innerHTML = uploadPercent + "%";
+		};
+	}
+	function closeAndResetUploadModal()	{
+		uploadModal.style.display = "none";
+		uploadBarElement.style.width = "0%";
+		uploadPercentageElement.innerHTML = "0%";
+	}
+	function uploadDescription()	{
+		closeDescriptionModal();
+		uploadModal.style.display = "block";
+		var textAjax = new XMLHttpRequest();
+		textAjax.open("POST", "info.php", true);
+		textAjax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		textAjax.onreadystatechange = function(){
+			closeAndResetUploadModal();
+			if(this.readyState == 4 && this.status == 200 && this.responseText == "1"){
+				showSnackbar("აღწერა აიტვირთა");
+			}
+		};
+		setUploadProgress(textAjax);
+		textAjax.send("n=" + n + "&key=" + key + "&description=" + descriptionInputElement.value);
+	}
+	function errorNotice(local_notice_text)	{
+		var noticeContentString = "<p style=\"display:inline-block;color:" + textColour + ";\"><b><span style=\"color:#ff0000;\">შეცდომა!</span><br><br>სერვერის პასუხი:</b><br>";
+		noticeContentString += local_notice_text;
+		noticeContentString += "</p>";
+		document.getElementById("noticeWindowContent").innerHTML = noticeContentString;
+		noticeModal.style.display = "block";
+	}
+	function uploadFile(inputID)	{
+		uploadModal.style.display = "block";
+		var formData = new FormData;
+		formData.append("file", document.getElementById(inputID).files[0]);
+		var fileAjax = new XMLHttpRequest();
+		if(inputID != "recordAudio")	{
+			fileUploadURL = "media.php";
+		}
+		else	{
+			fileUploadURL = "sound_upload.php?id=" + sound_id + "&key=" + sound_key;
+		}
+		fileAjax.open("POST", fileUploadURL);
+		fileAjax.onreadystatechange = function(){
+			if(fileChose)	{
+				closeFilePreview();
+			}
+			clearAllInput();
+			closeAndResetUploadModal();
+			if(this.readyState == 4 && this.status == 200){
+				if(this.responseText.charAt(0) == '#')	{
+					if(fileType == "photo")	{
+						showSnackbar("სურათი აიტვირთა");
+					}
+					else if(fileType == "video")	{
+						showSnackbar("ვიდეო აიტვირთა");
+					}
+					n = this.responseText.substring(1, this.responseText.indexOf('|'));
+					setCookie("n", getCookie("n") + '|' + n, 365);
+					key = this.responseText.substring(this.responseText.indexOf('|') + 1);
+					if(!fileChose && gotLocation)	{
+						uploadLocation();
+					}
+					audioModal.style.display = "block";
+					openDescriptionModal();
+				}
+				else if(this.responseText.charAt(0) == '1')	{
+					showSnackbar("ხმის ჩანაწერი აიტვირთა");
+				}
+				else if(this.responseText.substring(0, 2) == "-2")	{
+					var alreadyUploadedID = this.responseText.substring(2);
+					var noticeContentString = "<span style=\"color:#ff0000;\"><b>ატვირთვა არ მოხდა!</span><br><br>";
+					noticeContentString += "<p style=\"display:inline-block;color:" + textColour + ";\">არჩეული ფაილი, სხვა დროს უკვე ატვირთულია (ნომერი - #";
+					noticeContentString += alreadyUploadedID;
+					noticeContentString += ")</p></b><br><br>";
+					noticeContentString += "<button class=\"buttons textcolourclass upload\" id=\"viewAlreadyUploaded\" style=\"color:";
+					if(darkModeElement.checked)	{
+						noticeContentString += "#ffffff";
+					}
+					else	{
+						noticeContentString += "#000000";
+					}
+					noticeContentString += "\">ნახვა</button>";
+					document.getElementById("noticeWindowContent").innerHTML = noticeContentString;
+					document.getElementById("viewAlreadyUploaded").onclick = function(){window.open("/get2.php?n=" + alreadyUploadedID);};
+					noticeModal.style.display = "block";
+				}
+				else if(this.responseText.substring(0, 2) == "-1")	{
+					var noticeContentString = "<span style=\"color:#ff0000;\"><b>ატვირთვა არ მოხდა!</span><br><br><p style=\"display:inline-block;color:" + textColour + ";\">ასატვირთი ფაილი უნდა იყოს სურათი ან ვიდეო</p></b>";
+					document.getElementById("noticeWindowContent").innerHTML = noticeContentString;
+					noticeModal.style.display = "block";
+				}
+				else if(this.responseText.substring(0, 2) == "-6")	{
+					var noticeContentString = "<b><span style=\"color:#ff0000;\">ატვირთვა არ მოხდა!</span><br><br><p style=\"display:inline-block;color:" + textColour + ";\">ასატვირთი ფაილის დასაშვები ფორმატებია:</b>";
+					noticeContentString += "<br>" + this.responseText.substring(2) + "</p>";
+					document.getElementById("noticeWindowContent").innerHTML = noticeContentString;
+					noticeModal.style.display = "block";
+				}
+				else	{
+					errorNotice(this.responseText);
+				}
+			}
+		};
+		setUploadProgress(fileAjax);
+		fileAjax.send(formData);
+	}
+	var qveitiSOStitleStyle = document.getElementById("title").style;
+	var qveitiSOSimageStyle = document.getElementById("qveitiSOSimage").style;
+	function setSizes(mode)	{
+		if((window.innerHeight > window.innerWidth) ^ mode)	{
+			qveitiSOStitleStyle.fontSize = "5vw";
+			qveitiSOSimageStyle.height = "10%";
+			qveitiSOSimageStyle.width = "auto";
+		}
+		else	{
+			qveitiSOStitleStyle.fontSize = "5vh";
+			qveitiSOSimageStyle.width = "10%";
+			qveitiSOSimageStyle.height = "auto";
+		}
+	}
+	setSizes(0);
+	qveitiSOSimageStyle.display = '';
+	window.addEventListener("resize", function(event) {
+		setSizes(0);
+	});
+	window.addEventListener("orientationchange", function(event) {
+		setSizes(1);
+	});
+	//var photoButton = document.getElementById("photoButton");
+	//var videoButton = document.getElementById("videoButton");
+	var photoInput = document.getElementById("takePhoto");
+	var videoInput = document.getElementById("recordVideo");
+	var choosePhotoInput = document.getElementById("choosePhoto");
+	var chooseVideoInput = document.getElementById("chooseVideo");
+	var audioInput = document.getElementById("recordAudio");
+	function takePhoto()	{
+		photoInput.click();
+	}
+	function recordVideo()	{
+		videoInput.click();
+	}
+	function chooseFile()	{
+		fileModal.style.display = "block";
+	}
+	function choosePhoto()	{
+		fileModal.style.display = "none";
+		choosePhotoInput.click();
+	}
+	function chooseVideo()	{
+		fileModal.style.display = "none";
+		chooseVideoInput.click();
+	}
+	function uploadPhoto()	{
+		fileChose = 0;
+		fileType = "photo";
+		uploadFile("takePhoto");
+	}
+	function uploadVideo()	{
+		fileChose = 0;
+		fileType = "video";
+		uploadFile("recordVideo");
+	}
+	function previewPhoto()	{
+		fileChose = 1;
+		fileType = "photo";
+		setPreview(choosePhotoInput.files[0]);
+		previewModal.style.display = "block";
+	}
+	function previewVideo()	{
+		fileChose = 1;
+		fileType = "video";
+		setPreview(chooseVideoInput.files[0]);
+		previewModal.style.display = "block";
+	}
+	document.getElementById("upload").onclick = function()	{
+		if(fileType == "photo")	{
+			uploadFile("choosePhoto");
+		}
+		else if(fileType == "video")	{
+			uploadFile("chooseVideo");
+		}
+	};
+	function getAudio()	{
+		audioInput.click();
+	}
+	function gotAudio()	{
+		setElementEnable(uploadAudioButton, 1);
+	}
+	function getSoundIDandKEY()	{
+		soundIDajax = new XMLHttpRequest();
+		soundIDajax.open("POST", "sound_id_and_key.php", 1);
+		soundIDajax.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		soundIDajax.onreadystatechange = function()	{
+			if(this.readyState == 4 && this.status == 200)	{
+				response = this.responseText;
+				sound_id = response.substring(0, response.indexOf('*'));
+				sound_key = response.substring(response.indexOf('*') + 1);
+				uploadFile("recordAudio");
+			}
+		};
+		soundIDajax.send("n=" + n + "&key=" + key);
+	}
+	uploadAudioButton.onclick = function()	{
+		getSoundIDandKEY();
+		closeAudioModal();
+	};
+	function clearAllInput()	{
+		photoInput.value = '';
+		videoInput.value = '';
+		choosePhotoInput.value = '';
+		chooseVideoInput.value = '';
+		audioInput.value = '';
+	}
+	function openDatabase()	{
+		window.open("get_app.php?search_for=all");
+	}
+	function openStatistics()	{
+		window.open("statistics.php");
+	}
+	let titlePedestrian = document.getElementById("title_pedestrian");
+	let darkModeElement = document.getElementById("darkmode");
+	if(getCookie("darkmode") !== "0")	{
+		darkModeElement.checked = 1;
+		darkMode();
+	}
+	function darkMode() {
+		textColour = "#000000";
+		backgroundColour = "#ffffff";
+		if(darkModeElement.checked)   {
+			titlePedestrian.style.color = "#4080ff";
+			temp = textColour;
+			textColour = backgroundColour;
+			backgroundColour = temp;
+			setCookie("darkmode", "1", 1000);
+		}
+		else	{
+			titlePedestrian.style.color = "#0000ff";
+			setCookie("darkmode", "0", 1000);
+		}
+		document.body.style.backgroundColor = backgroundColour;
+		elements = document.getElementsByClassName("textcolourclass");
+		for(i = 0; i < elements.length; i++)   {
+			elements[i].style.color = textColour;
+		}
+		elements = document.getElementsByClassName("backgroundcolourclass");
+		for(i = 0; i < elements.length; i++)   {
+			elements[i].style.backgroundColor = backgroundColour;
+		}
+	}
+</script>
+</html>

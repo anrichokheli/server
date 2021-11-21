@@ -1,0 +1,113 @@
+<title>ქვეითი SOS</title>
+<head><link rel="icon" href="pedestriansos.png"></head>
+<meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1">
+<html>
+<video id="video" style="width:100%;height:90%;"></video>
+<button onclick="camera(1)">facing</button>
+<button onclick="startLive()">live start</button>
+<button onclick="stopLive()">live stop</button>
+<span id="islive" style="color:#ffffff;background:#ff0000;display:none">LIVE</span>
+</html>
+<script>
+let isLive = document.getElementById("islive");
+var liveID = "";
+var liveKEY = "";
+var liveLoop;
+const video = document.querySelector('video');
+var mode = "environment";
+function sendVideoFrame()	{
+	const video = document.getElementById("video");
+	const canvas = document.createElement("canvas");
+	canvas.width = video.videoWidth;
+	canvas.height = video.videoHeight;
+	canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+	const dataURL = canvas.toDataURL();
+	var data = new FormData();
+	data.append("image", dataURL);
+	var fileAjax = new XMLHttpRequest();
+	fileAjax.open("POST", "live.php"/*?ID=" + liveID + "&KEY=" + liveKEY*/);
+	//fileAjax.onreadystatechange = function(){console.log(this.responseText)};
+	fileAjax.send(data);
+}
+function setCookie(cname, cvalue, exdays) {
+	var d = new Date();
+	d.setTime(d.getTime() + (exdays*24*60*60*1000));
+	var expires = "expires="+ d.toUTCString();
+	document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+function startLive()	{
+	var startLiveAjax = new XMLHttpRequest();
+	startLiveAjax.open("GET", "live.php?setup");
+	startLiveAjax.onreadystatechange = function(){
+		if(this.readyState == 4 && this.status == 200)	{
+			var response = this.responseText;
+			if(response.charAt(0) == ':')	{
+				liveNUM = response.substring(1, response.indexOf('#'));
+				liveID = response.substring(response.indexOf('#') + 1, response.indexOf('*'));
+				liveKEY = response.substring(response.indexOf('*') + 1);
+				liveLoop = setInterval(function(){sendVideoFrame();}, /*30*/10000);
+				setCookie("ID", liveID);
+				setCookie("KEY", liveKEY);
+				isLive.style.display = "inline-block";
+			}
+		}
+	};
+	startLiveAjax.send();
+}
+function stopLive()	{
+	clearInterval(liveLoop);
+	isLive.style.display = "none";
+}
+function stopStreamedVideo(videoElem) {
+	const stream = videoElem.srcObject;
+	const tracks = stream.getTracks();
+	tracks.forEach(function(track) {
+		track.stop();
+	});
+	videoElem.srcObject = null;
+}
+function camera(stopEnable)	{
+	if(stopEnable)	{
+		stopStreamedVideo(video);
+	}
+	var constraints = { audio: 0, video: {height: 360, width: 480, facingMode: mode} };
+	navigator.mediaDevices.getUserMedia(constraints)
+	.then(function(mediaStream) {
+		video.srcObject = mediaStream;
+		video.onloadedmetadata = function(e) {
+			video.play();
+		};
+	})
+	.catch(function(err) { console.log(err.name + ": " + err.message); }); // always check for errors at the end.
+	if(mode == "user")	{
+		mode = "environment";
+	}
+	else if(mode == "environment")	{
+		mode = "user";
+	}
+}
+camera(0);
+/*
+  const handleSuccess = function(stream) {
+    const context = new AudioContext();
+    const source = context.createMediaStreamSource(stream);
+    const processor = context.createScriptProcessor(1024, 1, 1);
+
+    source.connect(processor);
+    processor.connect(context.destination);
+
+    processor.onaudioprocess = function(e) {
+      // Do something with the data, e.g. convert it to WAV
+	var data = new FormData();
+	data.append("a", e.inputBuffer.getChannelData(0));
+	var fileAjax = new XMLHttpRequest();
+	fileAjax.open("POST", "a.php");
+	//fileAjax.onreadystatechange = function(){console.log(this.responseText)};
+	fileAjax.send(data);
+    };
+  };
+
+  navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+      .then(handleSuccess);
+*/
+</script>

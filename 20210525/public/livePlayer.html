@@ -1,0 +1,21 @@
+<html>
+	<img id="frame" / >
+</html>
+<script>
+	let livePath = "/?/uploads/live/";
+	let frameElement = document.getElementById("frame");
+	var url = new URL(window.location.href);
+	var n = url.searchParams.get("n");
+	let framePath = livePath + n + "/";
+	function getFrame()	{
+		var ajax = new XMLHttpRequest();
+		ajax.open("GET", livePath + n + "_n");
+		ajax.onreadystatechange = function()	{
+			if(this.readyState == 4 && this.status == 200)	{
+				frameElement.src = framePath + this.responseText;
+			}
+		};
+		ajax.send();
+	}
+	var frameLoop = setInterval(function(){getFrame();}, /*30*/10000);
+</script>
