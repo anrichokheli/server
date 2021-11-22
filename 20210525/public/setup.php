@@ -1,8 +1,8 @@
 <?php
-    define("id", "0123");
-    define("key", "123");
-    define("username", "qveitisos");
-    define("password", "admin_qveitisos");
+    define("id", "");
+    define("key", "");
+    define("username", "");
+    define("password", "");
     define("lockTime", 60);
     define("protectedPrivatePath", dirname(getcwd()) . "/protected/private/");
     define("lockTimePath", protectedPrivatePath . "locktime");
